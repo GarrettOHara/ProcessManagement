@@ -22,7 +22,7 @@ void static print_tokens(vector<string> tokens){
 
 /* READ IN TEXT FILE AND TOKENIZE INTO STRINGS
  * INSERT BOOLEAN DETERMINES TO INSERT OR SEARCH WORD IN TRIE */
-void static read_file(dicttree &root, const char* path, bool insert){
+void static read_file(dicttree* root, const char* path, bool insert){
   ifstream file(path);
   string line;
   string temp = "";
@@ -33,9 +33,9 @@ void static read_file(dicttree &root, const char* path, bool insert){
         char* token = strtok (&line[0], delimiters);
         while(token != NULL){
             if(insert)
-                root.insertme(token);
+                root->insertme(token);
             else{
-                int count = root.searchme(token);
+                int count = root->searchme(token);
                 cout << token << " " << count << endl;
             }
             token = strtok (NULL, delimiters);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
     const char *dict_path = argv[1];
     const char *text_path = argv[2];
     
-    dicttree root;
+    dicttree* root = new dicttree();
     read_file(root, dict_path, true);
     read_file(root, text_path, false);
 
