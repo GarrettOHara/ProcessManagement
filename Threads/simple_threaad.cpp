@@ -4,6 +4,8 @@
 
 using namespace std;
 
+bool threading = false;
+
 void* print_hello(void* arg){
     long long *arg_ptr = (long long*) arg;
     long long ptr = *arg_ptr;
@@ -14,7 +16,10 @@ void* print_hello(void* arg){
         cout << "Sum is now: " << val << endl;
     }
 
-    pthread_exit(NULL);
+    threading = true;
+
+    // return value in second parameter of join
+    pthread_exit(0);
 }
 
 int main(int argc, char** argv){
@@ -28,5 +33,10 @@ int main(int argc, char** argv){
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 
-    pthread_create(&thread_id, &attr, print_hello, &val);
+    pthread_create(&thread_id, NULL, print_hello, &val);
+
+    while(threading){
+        // wait for thread to execute
+    }
+    pthread_join(thread_id, NULL);
 }
