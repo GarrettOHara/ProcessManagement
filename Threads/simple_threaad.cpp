@@ -1,42 +1,73 @@
+#include <algorithm>
+#include <vector>
 #include <iostream>
 #include <cstdlib>
 #include <pthread.h>
 
 using namespace std;
 
-bool threading = false;
+void *insert();
+void *search();
 
-void* print_hello(void* arg){
-    long long *arg_ptr = (long long*) arg;
-    long long ptr = *arg_ptr;
-    long long val = 0;
+bool inserting = true;
+bool searching = true;
 
-    for(long long i = 0; i < ptr; ++i){
-        val+=i;
-        cout << "Sum is now: " << val << endl;
+void* insert(void* arg){
+    // int *arg_ptr = (int*) arg;
+    // int ptr = *arg_ptr;
+    // cout << "PARAMETER: " << ptr << endl;
+
+    vector<int> *list = (vector<int>*)arg;
+    vector<int> vect = *list;
+
+    for(int i = 0; i < vect.size(); i++){
+        cout << vect[i] << endl;
     }
 
-    threading = true;
+    for(int i = 0; i < 10; i++){
+        cout << "INSERTING DICTTREE: " << i << endl;
+    }
+
+    // end insertion
+    inserting = false;
 
     // return value in second parameter of join
     pthread_exit(0);
 }
 
+void* search(void* arg){
+    // waiting for insertion
+    while(inserting){ }
+
+
+    cout << "SEARCH: " << endl;
+    searching = false;
+
+    pthread_exit(0);
+}
+
 int main(int argc, char** argv){
 
-    long long val = atoll(argv[1]);
+    int val = atoi(argv[1]);
 
     // create thread id
-    pthread_t thread_id;
+    pthread_t thread1, thread2;
 
+    // create heap data
+    vector<int> *list = new vector<int>();
+    list->push_back(1);
+    list->push_back(2);
+    
     // create attributes
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 
-    pthread_create(&thread_id, NULL, print_hello, &val);
+    pthread_create(&thread1, &attr, insert, &list);
+    pthread_create(&thread2, &attr, search, NULL);
 
-    while(threading){
-        // wait for thread to execute
-    }
-    pthread_join(thread_id, NULL);
+    // waiting on threads
+    while(inserting || searching){ }
+    
+    cout << "FINISHED" << endl;
+    //pthread_join(thread_id, NULL);
 }
