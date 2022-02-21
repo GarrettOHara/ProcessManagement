@@ -14,6 +14,11 @@
 
 using namespace std;
 
+struct thread_arg {
+    string file_path;
+    dicttree root;
+} insert_thread, search_thread;
+
 void static print_tokens(vector<string> tokens){
     for(int i = 0; i < tokens.size(); i++){
         cout << tokens[i] << endl;
@@ -57,6 +62,23 @@ int main(int argc, char *argv[]){
     const char *text_path = argv[2];
     
     dicttree* root = new dicttree();
+
+    /**
+     * instantiate dicttree node on the stack,
+     * pass it in by pointer along with the file
+     * itself (dictionary file)
+     * 
+     * create a stuct that contains the 
+     * node and a string variable which is a
+     * realative path to the file we need to read
+     * open
+     * 
+     * then pass the struct to the thread
+     * from there we can open the file up and 
+     * read it in, inserting or searching each
+     * token from the file on our stack instantiated node
+     */
+
     read_file(root, dict_path, true);
     read_file(root, text_path, false);
 

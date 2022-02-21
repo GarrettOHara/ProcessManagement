@@ -13,15 +13,14 @@ bool inserting = true;
 bool searching = true;
 
 void* insert(void* arg){
-    vector<int*>&v = *reinterpret_cast<vector<int*>*>(arg);
-    cout << *v.at(0) << endl;
-    v.push_back(3);
+
+    vector<int>* vect = (vector<int>*)arg;
     
-
-    for(int i = 0; i < 10; i++){
-        cout << "INSERTING DICTTREE: " << i << endl;
+    // insert
+    for(int i = 0; i < 30; i++){
+        vect->push_back(i);
     }
-
+    
     // end insertion
     inserting = false;
 
@@ -33,6 +32,12 @@ void* search(void* arg){
     // waiting for insertion
     while(inserting){ }
 
+    vector<int>* vect = (vector<int>*)arg;
+
+    // read vector
+    for(int i = 0; i < vect->size(); i++){
+        cout << vect->at(i) << endl;
+    }
 
     cout << "SEARCH: " << endl;
     searching = false;
@@ -50,25 +55,23 @@ int main(int argc, char** argv){
     pthread_t thread1, thread2;
 
     // create heap data
-    vector<int> *list = new vector<int>();
-    list->push_back(1);
-    list->push_back(2);
+    // vector<int> *heap = new vector<int>();
+    // heap->push_back(1);
+    // heap->push_back(2);
     
     // CREATES SEGMENTATION FAULT
-    // vector<int> *list;
-    // list->push_back(1);
-    // list->push_back(2);
+    vector<int> list;
 
     // create attributes
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 
-    pthread_create(&thread1, &attr, insert, (void*)&list);
-    pthread_create(&thread2, &attr, search, NULL);
+    // pthread_create(&thread1, &attr, insert, (void*)&list);
+    pthread_create(&thread1, &attr, insert, &list);
+    pthread_create(&thread2, &attr, search, &list);
 
     // waiting on threads
     while(inserting || searching){ }
     
     cout << "FINISHED" << endl;
-    //pthread_join(thread_id, NULL);
 }
