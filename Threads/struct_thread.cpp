@@ -14,19 +14,21 @@ bool inserting = true;
 bool searching = true;
 
 struct Thread_Args {
-    string file_path;
     vector<int>* root;
+    string file_path;
+	int file_size;
+	
 };
 
 void* insert(void* arg){
+	cout << "--------INSERT-------- " << endl;
     struct Thread_Args *tmp = (struct Thread_Args*)arg;
-
+	cout << "FILE PATH: " << tmp->file_path << endl;
     vector<int>* vect = tmp->root;
 
     for(int i = 0; i < 10; i++){
         vect->push_back(i);
     }
-    
 
     // end insertion
     inserting = false;
@@ -36,11 +38,10 @@ void* insert(void* arg){
 }
 
 void* search(void* arg){
-	cout << "SEARCH: " << endl;
 
     // waiting for insertion
     while(inserting){ }
-
+	cout << "--------SEARCH-------- " << endl;
     struct Thread_Args *tmp = (struct Thread_Args*)arg;
     vector<int> vect = *tmp->root;
     cout << "FILE PATH: " << tmp->file_path << endl;
@@ -75,13 +76,13 @@ int main(int argc, char** argv){
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 
-    Thread_Args insert_thread = {"", &list};
+    Thread_Args insert_thread = {"insert", &list};
+	Thread_Args serach_thread = {"search", &list};
     
 
     // pthread_create(&thread1, &attr, insert, (void*)&list);
     pthread_create(&thread1, &attr, insert, &insert_thread);
-    insert_thread.file_path = "test";
-    pthread_create(&thread2, &attr, search, &insert_thread);
+    pthread_create(&thread2, &attr, search, &serach_thread);
 
     //while(inserting){}
     // waiting on threads
