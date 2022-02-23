@@ -52,46 +52,46 @@ void static read_file(dicttree* root, const char* path, bool insert){
 }
 
 int main(int argc, char *argv[]){
-  const string err = "\n\nExiting program...\n";
-  try{
+    const string err = "\n\nExiting program...\n";
+    try{
 
-    if(argc != 3)
-    throw("Invalid amount of arguments");
+        if(argc != 3)
+        throw("Invalid amount of arguments");
 
-    const char *dict_path = argv[1];
-    const char *text_path = argv[2];
-    
-    dicttree* root = new dicttree();
+        const char *dict_path = argv[1];
+        const char *text_path = argv[2];
+        
+        dicttree* root = new dicttree();
 
-    /**
-     * instantiate dicttree node on the stack,
-     * pass it in by pointer along with the file
-     * itself (dictionary file)
-     * 
-     * create a stuct that contains the 
-     * node and a string variable which is a
-     * realative path to the file we need to read
-     * open
-     * 
-     * then pass the struct to the thread
-     * from there we can open the file up and 
-     * read it in, inserting or searching each
-     * token from the file on our stack instantiated node
-     */
+        /**
+         * instantiate dicttree node on the stack,
+         * pass it in by pointer along with the file
+         * itself (dictionary file)
+         * 
+         * create a stuct that contains the 
+         * node and a string variable which is a
+         * realative path to the file we need to read
+         * open
+         * 
+         * then pass the struct to the thread
+         * from there we can open the file up and 
+         * read it in, inserting or searching each
+         * token from the file on our stack instantiated node
+         */
 
-    read_file(root, dict_path, true);
-    read_file(root, text_path, false);
+        read_file(root, dict_path, true);
+        read_file(root, text_path, false);
 
-  } catch(const char* msg){
-    cout << msg << 
-    "\n\nPlease supply 2 exceptions:" <<
-    "\n  - Path to dictionary"  <<
-    "\n  - Path to sample text" <<
-    err << endl;
-  } catch ( const exception& e ) {
-    cerr << "ERROR: " << e.what() << err << endl;
-  } catch (...) {
-    cout << "Exception occurred";
-  }
-  return 0;
+    } catch(const char* msg){
+        cout << msg << 
+        "\n\nPlease supply 2 exceptions:" <<
+        "\n  - Path to dictionary"  <<
+        "\n  - Path to sample text" <<
+        err << endl;
+    } catch ( const exception& e ) {
+        cerr << "ERROR: " << e.what() << err << endl;
+    } catch (...) {
+         cout << "Exception occurred";
+    }
+    return 0;
 }
