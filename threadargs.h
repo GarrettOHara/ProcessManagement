@@ -14,7 +14,7 @@ struct Thread_Args {
     int min_count;
     const char* file_path[FILE_COUNT];
     long chars_in_file[FILE_COUNT];
-    long chars_processed[FILE_COUNT];
+    long* chars_processed[FILE_COUNT];
     long word_count[FILE_COUNT];
     bool task_done[FILE_COUNT];
 

@@ -15,15 +15,8 @@
 #include "arguments.h"
 
 
-#define FILE_COUNT 2                            // INPUT FILES
 #define DICTOINARY_INDEX 0                      // DICT INDEX
 #define SAMPLE_INDEX 1                          // SAMPLE INDEX
-#define DEFAULT_NUMOF_MARKS 50                  // PROGRESS MARKS
-#define NUMOF_MARKS_CIELING 10                  // CIELING OF MARKS 
-#define DEFAULT_HASH_INTERVAL 10                // HASH EVERY N MARKS
-#define HASH_INTERVAL_CIELING 10                // HASH MARK CEILING
-#define DEFAULT_PREFIX_COUNT 1                  // STD OUT MIN COUNT
-#define FLOOR 0                                 // ARGUMENT FLOOR
 
 
 using namespace std;
@@ -42,13 +35,23 @@ int main(int argc, char* argv[]){
         EXEC_STATUS.root = root;
 
         arguments::process_args(argc,argv);
+
+        cout << EXEC_STATUS.hash_interval << endl;
+        cout << EXEC_STATUS.min_count << endl;
+        cout << EXEC_STATUS.progress_marks << endl;
         
         pthread_create(&thread1, NULL, inserting::insert, &EXEC_STATUS);
         pthread_create(&thread2, NULL, searching::search, &EXEC_STATUS);
 
         // waiting on threads
         while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]
-            ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){ }
+            ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){
+
+                /**
+                 * Proccess all data in here for I/O
+                 * 
+                 */
+             }
         
     } catch(const char* msg){
         cout << msg << 

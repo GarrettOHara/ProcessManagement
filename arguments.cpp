@@ -19,7 +19,7 @@
 #define DICTOINARY_INDEX 0                      // DICT INDEX
 #define SAMPLE_INDEX 1                          // SAMPLE INDEX
 #define DEFAULT_NUMOF_MARKS 50                  // PROGRESS MARKS
-#define NUMOF_MARKS_CIELING 10                  // CIELING OF MARKS 
+#define NUMOF_MARKS_FLOOR 10                    // CIELING OF MARKS 
 #define DEFAULT_HASH_INTERVAL 10                // HASH EVERY N MARKS
 #define HASH_INTERVAL_CIELING 10                // HASH MARK CEILING
 #define DEFAULT_PREFIX_COUNT 1                  // STD OUT MIN COUNT
@@ -39,21 +39,21 @@ void arguments::process_flag(char flag[], char arg[]){
     char count[]    = "-n";
     
     if(strcmp(flag,progress) == 0){
-        if(num > NUMOF_MARKS_CIELING)
+        if(num < NUMOF_MARKS_FLOOR)
             throw invalid_argument("Number of progress marks must be a "
             "number and at least 10");
         EXEC_STATUS.progress_marks = num;
     }        
     
     if(strcmp(flag,hashes) == 0){
-        if(FLOOR <= num && num < HASH_INTERVAL_CIELING)
+        if(FLOOR > num || num >= HASH_INTERVAL_CIELING)
             throw invalid_argument("Hash mark interval for progress must be "
                 "a number, greater than 0, and less than or equal to 10");
         EXEC_STATUS.hash_interval = num;
     }        
     
     if(strcmp(flag,count) == 0){
-        if(FLOOR <= num && num < INT32_MAX)
+        if(FLOOR >= num || num > INT32_MAX)
             throw invalid_argument("Word count constraint must be positive "
                 "and within the range of LONG");
         EXEC_STATUS.min_count = num;
@@ -113,4 +113,6 @@ void arguments::process_args(int argc, char* argv[]){
         EXEC_STATUS.progress_marks = DEFAULT_NUMOF_MARKS;
     if(EXEC_STATUS.hash_interval == 0)
         EXEC_STATUS.hash_interval = DEFAULT_HASH_INTERVAL;
+    if(EXEC_STATUS.min_count == 0)
+        EXEC_STATUS.min_count = DEFAULT_PREFIX_COUNT;
 }
