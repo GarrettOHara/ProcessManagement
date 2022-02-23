@@ -1,87 +1,140 @@
-/**
- * This Program was written by:
- * 
- * Garrett O'Hara cssc1136 RedId: 822936303
- * 
- * CS 480 | Professor Shen | January 2022
- **/
+#include <algorithm>
 #include <vector>
-#include <fstream>
-#include <sstream>
 #include <iostream>
-#include <cstring>
+#include <cstdlib>
+#include <fstream>
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdexcept>
+#include <limits.h>
 #include "dicttree.h"
+#include "inserting.h"
+#include "searching.h"
+#include "threadargs.h"
+
+
+#define FILE_COUNT 2                            // INPUT FILES
+#define DICTOINARY_INDEX 0                      // DICT INDEX
+#define SAMPLE_INDEX 1                          // SAMPLE INDEX
+#define DEFAULT_NUMOF_MARKS 50                  // PROGRESS MARKS
+#define NUMOF_MARKS_CIELING 10                  // CIELING OF MARKS 
+#define DEFAULT_HASH_INTERVAL 10                // HASH EVERY N MARKS
+#define HASH_INTERVAL_CIELING 10                // HASH MARK CEILING
+#define DEFAULT_PREFIX_COUNT 1                  // STD OUT MIN COUNT
+#define FLOOR 0                                 // ARGUMENT FLOOR
+
 
 using namespace std;
 
-struct thread_arg {
-    string file_path;
-    dicttree root;
-} insert_thread, search_thread;
 
-void static print_tokens(vector<string> tokens){
-    for(int i = 0; i < tokens.size(); i++){
-        cout << tokens[i] << endl;
+Thread_Args EXEC_STATUS;
+
+void process_flag(char flag[], char arg[]){
+    const int num = atoi(arg);
+    char progress[] = "-p";
+    char hashes[]   = "-h";
+    char count[]    = "-n";
+    
+    if(strcmp(flag,progress) == 0){
+        if(num > NUMOF_MARKS_CIELING)
+            throw invalid_argument("Number of progress marks must be a "
+            "number and at least 10");
+        EXEC_STATUS.progress_marks = num;
+    }        
+    
+    if(strcmp(flag,hashes) == 0){
+        if(FLOOR <= num && num < HASH_INTERVAL_CIELING)
+            throw invalid_argument("Hash mark interval for progress must be "
+                "a number, greater than 0, and less than or equal to 10");
+        EXEC_STATUS.hash_interval = num;
+    }        
+    
+    if(strcmp(flag,count) == 0){
+        if(FLOOR <= num && num < INT32_MAX)
+            throw invalid_argument("Word count constraint must be positive "
+                "and within the range of LONG");
+        EXEC_STATUS.min_count = num;
     }
 }
 
-/* READ IN TEXT FILE AND TOKENIZE INTO STRINGS
- * INSERT BOOLEAN DETERMINES TO INSERT OR SEARCH WORD IN TRIE */
-void static read_file(dicttree* root, const char* path, bool insert){
-  ifstream file(path);
-  string line;
-  string temp = "";
+void process_args(int argc, char* argv[]){
+    if(argc < 3){
+        printf("ERROR: You need to supply a Dictionary file and "
+               "Sample text.\n");
+        throw invalid_argument("invalid arguments");
+        exit(1);
+    } else if(argc > 9){
+        printf("ERROR: You passed too many arguments.");
+        throw invalid_argument("invalid arguments");
+        exit(1);
+    } else {
 
-  if(file.is_open()){
-    while (getline(file,line)){
-        char delimiters[] = " \n\r !\"#$%&()*+,-./0123456789:;<=>?@[\\]^_`{|}~";
-        char* token = strtok (&line[0], delimiters);
-        while(token != NULL){
-            if(insert)
-                root->insertme(token);
-            else{
-                int count = root->searchme(token);
-                cout << token << " " << count << endl;
+        /* START INDEX AT 1 TO PASS EXECUTABLE FILE  ARG*/
+        for(int i = 1; i < argc; i++){
+            bool text = false;
+            int  file_index = 0;
+            for(int j = 0; j < strlen(argv[i]); j++){
+
+                /* ENCOUNTERED FLAG MAKE SURE ARGUMENT EXISTS */
+                if(argv[i][j]=='-' && i+1 < argc){
+
+                    /* SKIP FLAG ARGUMENT */
+                    process_flag(argv[i], argv[i+1]);
+                    i++;
+                    break;
+                } else 
+                    text = true;
             }
-            token = strtok (NULL, delimiters);
+
+            /* CURRENT ARGUMENT IS A TEXT FILE 
+               STORE RELATIVE PATH IN file_path */
+            if(text){
+                if(EXEC_STATUS.file_path[DICTOINARY_INDEX]==NULL)
+                    EXEC_STATUS.file_path[DICTOINARY_INDEX]=argv[i];
+                else if(EXEC_STATUS.file_path[SAMPLE_INDEX]==NULL)
+                    EXEC_STATUS.file_path[SAMPLE_INDEX]=argv[i];
+                else{
+                    printf("ERROR: You need to supply a Dictionary file and "
+                           "Sample text.\n");
+                    throw invalid_argument("passed too many arguments");
+                }
+            }
         }
     }
-    file.close();
-  }
-  return;
+    if(EXEC_STATUS.file_path[DICTOINARY_INDEX]==NULL
+        || EXEC_STATUS.file_path[SAMPLE_INDEX]==NULL){
+        throw invalid_argument("mandatory parameters not supplied");
+        exit(1);
+    }
+    if(EXEC_STATUS.progress_marks == 0)
+        EXEC_STATUS.progress_marks = DEFAULT_NUMOF_MARKS;
+    if(EXEC_STATUS.hash_interval == 0)
+        EXEC_STATUS.hash_interval = DEFAULT_HASH_INTERVAL;
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char* argv[]){
     const string err = "\n\nExiting program...\n";
     try{
+        // create thread id
+        pthread_t thread1, thread2;
 
-        if(argc != 3)
-        throw("Invalid amount of arguments");
+        // STACK DATA
+        // dicttree root;
+        dicttree *root = new dicttree;
+        EXEC_STATUS.root = root;
 
-        const char *dict_path = argv[1];
-        const char *text_path = argv[2];
+        process_args(argc,argv);
         
-        dicttree* root = new dicttree();
+        // pthread_create(&thread1, &attr, insert, (void*)&list);
+        pthread_create(&thread1, NULL, inserting::insert, &EXEC_STATUS);
+        pthread_create(&thread2, NULL, searching::search, &EXEC_STATUS);
 
-        /**
-         * instantiate dicttree node on the stack,
-         * pass it in by pointer along with the file
-         * itself (dictionary file)
-         * 
-         * create a stuct that contains the 
-         * node and a string variable which is a
-         * realative path to the file we need to read
-         * open
-         * 
-         * then pass the struct to the thread
-         * from there we can open the file up and 
-         * read it in, inserting or searching each
-         * token from the file on our stack instantiated node
-         */
-
-        read_file(root, dict_path, true);
-        read_file(root, text_path, false);
-
+        // waiting on threads
+        //while(inserting || searching){ }
+        while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]
+            ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){ }
+        
     } catch(const char* msg){
         cout << msg << 
         "\n\nPlease supply 2 exceptions:" <<
@@ -91,7 +144,6 @@ int main(int argc, char *argv[]){
     } catch ( const exception& e ) {
         cerr << "ERROR: " << e.what() << err << endl;
     } catch (...) {
-         cout << "Exception occurred";
+        cout << "Exception occurred";
     }
-    return 0;
 }
