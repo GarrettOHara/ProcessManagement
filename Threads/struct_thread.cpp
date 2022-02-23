@@ -192,8 +192,9 @@ int main(int argc, char* argv[]){
         pthread_t thread1, thread2;
 
         // STACK DATA
-        dicttree root;
-        EXEC_STATUS.root = &root;
+        // dicttree root;
+        dicttree *root = new dicttree;
+        EXEC_STATUS.root = root;
 
         process_args(argc,argv);
         
