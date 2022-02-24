@@ -7,6 +7,9 @@ CXXFLAGS=-std=c++11 -g
 
 CXXTHREADS=-pthread
 
+CFLAGS = -c -Wall -Iinclude
+
+
 # Rules format:
 # target : dependency1 dependency2 ... dependencyN
 #     Command to make target, uses default rules if not specified
@@ -15,7 +18,9 @@ CXXTHREADS=-pthread
 # make target specifies a specific target
 # $^ is an example of a special variable.  It substitutes all dependencies
 countwords : dicttree.o inserting.o searching.o threadargs.h arguments.o countwords.o
-	$(CXX) $(CXXFLAGS) $(CXXTHREADS) -o countwords $^
+	$(CXX) $(CXXFLAGS) $(CXXTHREADS) $^ 
+	
+# -o countwords
 
 dicttree.o : dicttree.h dicttree.cpp
 

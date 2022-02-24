@@ -6,6 +6,9 @@
         "vector": "cpp",
         "iostream": "cpp",
         "iosfwd": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "filesystem": "cpp",
+        "iterator": "cpp",
+        "fstream": "cpp"
     }
 }

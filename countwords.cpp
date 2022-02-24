@@ -45,13 +45,35 @@ int main(int argc, char* argv[]){
 
         // waiting on threads
         while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]
-            ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){
+          ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){
 
-                /**
-                 * Proccess all data in here for I/O
-                 * 
-                 */
-             }
+            /* WAIT UNTIL FILE SIZE IS INITIALIZED */
+            while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]==0){}
+            
+            while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]!=0 && !EXEC_STATUS.task_done[DICTOINARY_INDEX]){ 
+                const long divider = EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] / (long)EXEC_STATUS.progress_marks;
+                long hash_index = 1;
+                if(EXEC_STATUS.chars_processed[DICTOINARY_INDEX]>=divider*hash_index){
+                    if(hash_index%EXEC_STATUS.hash_interval)
+                        cout << '-';
+                    else
+                        cout << '#';
+                    hash_index++;
+                }
+            }
+            cout << "\nThere are "
+            << EXEC_STATUS.word_count[DICTOINARY_INDEX]
+            << " words in "
+            << EXEC_STATUS.file_path[DICTOINARY_INDEX]
+            << "."
+            << endl;
+
+            while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]==0){}
+
+            while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]!=0 && !EXEC_STATUS.task_done[SAMPLE_INDEX]){
+            
+            }
+        }
         
     } catch(const char* msg){
         cout << msg << 
