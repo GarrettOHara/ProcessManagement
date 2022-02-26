@@ -5,12 +5,12 @@
  * 
  * CS 480 | Professor Shen | Februrary 2022
  **/
-#ifndef INSERTING_H_                             /* INCLUDE GUARD */
+#ifndef INSERTING_H_                             // INCLUDE GUARD
 #define INSERTING_H_ 
 
 namespace inserting{
-    void* insert(void*);
+    void* insert(void*);                         // INSERT FUNCTION
 }
 
 
-#endif 
+#endif                                           // ARGUMENTS_H_

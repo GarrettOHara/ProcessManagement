@@ -38,7 +38,13 @@ bool dicttree::getword(){
     return this->isWord;
 }
 
-/* INDEX CHARACTERS 0-26 */
+/**
+ * @brief INDEX CHARACTERS 0-26
+ * 
+ * @param ch:   INPUT CHARACTER
+ * @param size: NODE CHILDREN SIZE
+ * @return int: INDEXED CHARACTER
+ */
 int static proccesschar(char ch, int size){
     char tmp = ch;
     if(tmp == '\''){
@@ -49,7 +55,11 @@ int static proccesschar(char ch, int size){
     return tmp;
 }
 
-/* INSERT WORD */
+/**
+ * @brief INSERT WORD INTO TRIE
+ * 
+ * @param token: STRING TO BE INSERTED
+ */
 void dicttree::insertme(string token){
     dicttree* node = this;
     for(int i = 0; i < token.length(); i++){
@@ -70,7 +80,21 @@ void dicttree::insertme(string token){
     node->setword(true);
 }
 
-/* RECURSIVE DEPTH FIRST SEARCH */
+/**
+ * @brief RECURSIVE DEPTH FIRST SEARCH
+ * 
+ * EDGE CASE: 
+ *  THE RECURSIVE IMPLEMENTATION HAS LESS 
+ *  MEMORY SPACE DUE TO THE CONSTRAINTS
+ *  OF THE STACK SPACE
+ * 
+ * SOLUTION:
+ *  IF INPUT FILE ITS TOO LARGE, USE
+ *  THE ITERATIVE SOLUTIONS
+ * 
+ * @param root: NODE FOR TRAVERSAL
+ * @return int: COUNT WITHIN TRIE
+ */
 int dicttree::DFS(dicttree* root){
     if(root==nullptr)
         return 0;
@@ -88,7 +112,13 @@ int dicttree::DFS(dicttree* root){
     return sum;
 }
 
-/* ITERATIVE DEPTH FIRST SEARCH */
+/**
+ * @brief ITERATIVE DEPTH FIRST SEARCH
+ * 
+ * @param root:  ROOT NODE FOR TRAVERSAL
+ * @param count: INITIAL COUNT
+ * @return int:  COUNT WITHIN TRIE
+ */
 int dicttree::DFS(dicttree* root, int count){
     stack<dicttree*> stack;
     stack.push(root);
@@ -108,7 +138,12 @@ int dicttree::DFS(dicttree* root, int count){
     return count;
 }
 
-/* ITERATIVE BREADTH FIRST SEARCH USING A QUEUE */
+/**
+ * @brief ITERATIVE BREADTH FIRST SEARCH USING A QUEUE
+ * 
+ * @param root: ROOT NODE FOR TRAVERSAL
+ * @return int: COUNT WITHIN TRIE
+ */
 int dicttree::BFS(dicttree* root){
     int count = 0;
     queue<dicttree*> q;
@@ -128,8 +163,16 @@ int dicttree::BFS(dicttree* root){
     return count;
 }
 
-
-/* SEARCH OCCURANCES OF PREFIX IN TREE */
+/**
+ * @brief SEARCH OCCURANCES OF PREFIX IN TREE
+ * 
+ * OTHER OPTIONS:
+ *  return DFS(node, 0);
+ *  return BFS(node);
+ * 
+ * @param token:STRING TO BE SEARCHED 
+ * @return int: COUNT WITHIN TRIE
+ */
 int dicttree::searchme(string token){
     dicttree* node = this;
     
@@ -147,6 +190,4 @@ int dicttree::searchme(string token){
     }
     
     return DFS(node);
-    // return DFS(node, 0);
-    // return BFS(node);
 }

@@ -9,8 +9,8 @@
 #define ARGUMENTS_H_
 
 namespace arguments{
-    void process_flag(char[], char[]);
-    void process_args(int , char*[]);
+    void process_flag(char[], char[]);           // PROCESS ARGUEMNT FLAGS
+    void process_args(int , char*[]);            // PROCESS CLI ARGUMENTS
 }
 
 #endif                                           // ARGUMENTS_H_

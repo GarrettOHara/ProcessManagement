@@ -1,4 +1,11 @@
-#ifndef THREADARGS_H_
+/**
+ * This Program was written by:
+ * 
+ * Garrett O'Hara cssc1136 RedId: 822936303
+ * 
+ * CS 480 | Professor Shen | January 2022
+ **/
+#ifndef THREADARGS_H_                            // INCLUDE GUARD
 #define THREADARGS_H_
 #include <iostream>
 #include "dicttree.h"
@@ -14,9 +21,10 @@ struct Thread_Args {
     int min_count;                               // MIN COUNT TO OUTPUT FILE
     const char* file_path[FILE_COUNT];           // RELATIVE FILE PATH 
     long chars_in_file[FILE_COUNT];              // NUMBER OF WORDS IN FILE
-    long chars_processed[FILE_COUNT];           // NUMBER OF WORDS PROCESSED
-    long word_count[FILE_COUNT];                 // 
-    bool task_done[FILE_COUNT];
+    long chars_processed[FILE_COUNT];            // NUMBER OF WORDS PROCESSED
+    long word_count[FILE_COUNT];                 // FILE ARGUMENTS
+    bool task_done[FILE_COUNT];                  // THREAD PROGRESS
+    bool good_file[FILE_COUNT];                  // MARKING FILE ARGUMENTS AS READABLE
 
     Thread_Args() { };                           // CONSTRUCTOR
     ~Thread_Args() { };                          // DECONSTRUCTOR

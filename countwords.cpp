@@ -1,3 +1,12 @@
+/**
+ * This Program was written by:
+ * 
+ * Garrett O'Hara cssc1136 RedId: 822936303
+ * 
+ * CS 480 | Professor Shen | January 2022
+ **/
+
+/* IMPORTS */
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -14,73 +23,129 @@
 #include "threadargs.h"
 #include "arguments.h"
 
-
+/* STATIC VARIABLES */
 #define DICTOINARY_INDEX 0                      // DICT INDEX
 #define SAMPLE_INDEX 1                          // SAMPLE INDEX
 
-
+/* NAMESPACE */
 using namespace std;
 
 
+/* INITIALIZE GLOBALLY FOR EXTERN CALLS */
 Thread_Args EXEC_STATUS;
 
-
+/**
+ * @brief MAIN THREAD, SPAWN WORKER THREADS
+ * MANAGE THREAD EXECUTION AND HANDLE PROGRAM I/O
+ * 
+ * @param argc: CLI ARGUMENT CONT
+ * @param argv: CLI ARGUMENT LIST
+ * @return int: PROGRAM EXECUTION COMPLETE
+ */
 int main(int argc, char* argv[]){
     const string err = "\n\nExiting program...\n";
     try{
-        // create thread id
-        pthread_t thread1, thread2;
+        /* INSTANTIATE THREADS */
+        pthread_t insert, search;
 
+        /* IMPLICIT DECLARATION OF ROOT NODE ON HEAP */
         dicttree *root = new dicttree;
+
+        /* SET POINTER TO ROOT IN SHARED STRUCT */
         EXEC_STATUS.root = root;
 
+        /* PROCESS CLI ARGUMENTS */
         arguments::process_args(argc,argv);
 
-        cout << EXEC_STATUS.hash_interval << endl;
-        cout << EXEC_STATUS.min_count << endl;
-        cout << EXEC_STATUS.progress_marks << endl;
+        /* CREATE WORKER THREADS */
+        pthread_create(&insert, NULL, inserting::insert, &EXEC_STATUS);
+        pthread_create(&search, NULL, searching::search, &EXEC_STATUS);
         
-        pthread_create(&thread1, NULL, inserting::insert, &EXEC_STATUS);
-        pthread_create(&thread2, NULL, searching::search, &EXEC_STATUS);
+        /* WAIT UNTIL FILE SIZE IS INITIALIZED */
+        while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]==0){}
+        
+        /* PROGRESS BAR UTILITY VARIABLE */
+        long hash_index = 1;
 
-        // waiting on threads
-        while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]
-          ||!EXEC_STATUS.task_done[SAMPLE_INDEX]){
-
-            /* WAIT UNTIL FILE SIZE IS INITIALIZED */
-            while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]==0){}
+        /* WAIT FOR INSERTING THREAD TO FINISH EXECUTION */
+        while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]){
             
-            while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]!=0 && !EXEC_STATUS.task_done[DICTOINARY_INDEX]){ 
-                const long divider = EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] / (long)EXEC_STATUS.progress_marks;
-                long hash_index = 1;
-                if(EXEC_STATUS.chars_processed[DICTOINARY_INDEX]>=divider*hash_index){
+            /* CHECK TO SEE IF FILE WAS OPENED */
+            if(EXEC_STATUS.good_file[DICTOINARY_INDEX]){
+
+                /* SET DIVISOR AS DIVIDENT OF TOTAL CHARS AND DESIRED PROGRESS MARKS 
+                FOR EVEN INCREMENTATIONS */
+                const long divider = EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] 
+                    / (long)EXEC_STATUS.progress_marks;
+
+                /* CHECK TO SEE IF NEXT PROGRESS INCREMENT HAS BEEN MET */
+                if(EXEC_STATUS.chars_processed[DICTOINARY_INDEX]>=(divider*hash_index)){
                     if(hash_index%EXEC_STATUS.hash_interval)
-                        cout << '-';
+                        cout << '-' << flush;
                     else
-                        cout << '#';
+                        cout << '#' << flush;
                     hash_index++;
                 }
+            } else {
+                throw ios_base::failure(EXEC_STATUS.file_path[DICTOINARY_INDEX]);
             }
+        }
+        
+        /* DISPLAY FILE DATA */
+        if(EXEC_STATUS.good_file[DICTOINARY_INDEX]){
             cout << "\nThere are "
             << EXEC_STATUS.word_count[DICTOINARY_INDEX]
             << " words in "
             << EXEC_STATUS.file_path[DICTOINARY_INDEX]
             << "."
             << endl;
+        }
 
-            while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]==0){}
+        /* WAIT FOR INSERTING THREAD TO FINISH EXECUTION */
+        while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]==0){}
 
-            while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]!=0 && !EXEC_STATUS.task_done[SAMPLE_INDEX]){
+        /* RESET PROGRESS BAR UTILITY VARIABLE */
+        hash_index = 1;
+        while(!EXEC_STATUS.task_done[SAMPLE_INDEX]){
             
+            /* CHECK TO SEE IF FILES WERE OPENED */
+            if(EXEC_STATUS.good_file[SAMPLE_INDEX]){
+                
+                /* SET DIVISOR AS DIVIDENT OF TOTAL CHARS AND DESIRED PROGRESS MARKS 
+                   FOR EVEN INCREMENTATIONS */
+                const long divider = EXEC_STATUS.chars_in_file[SAMPLE_INDEX] 
+                    / (long)EXEC_STATUS.progress_marks;
+                
+                /* CHECK TO SEE IF NEXT PROGRESS INCREMENT HAS BEEN MET */
+                if(EXEC_STATUS.chars_processed[SAMPLE_INDEX]>=(divider*hash_index)){
+                    if(hash_index%EXEC_STATUS.hash_interval)
+                        cout << '-' << flush;
+                    else
+                        cout << '#' << flush;
+                    hash_index++;
+                }
+            }else {
+                throw ios_base::failure(EXEC_STATUS.file_path[SAMPLE_INDEX]);
             }
         }
+
+        /* DISPLAY FILE DATA */
+        if(EXEC_STATUS.good_file[SAMPLE_INDEX]){
+            cout << "\nThere are "
+            << EXEC_STATUS.word_count[SAMPLE_INDEX]
+            << " words in "
+            << EXEC_STATUS.file_path[SAMPLE_INDEX]
+            << "."
+            << endl;
+        }
+
+        /* SUCCESS */
+        return 1;
         
     } catch(const char* msg){
-        cout << msg << 
-        "\n\nPlease supply 2 exceptions:" <<
-        "\n  - Path to dictionary"  <<
-        "\n  - Path to sample text" <<
-        err << endl;
+        cout << msg << err << endl;
+    } catch (const ios_base::failure& e){
+        cout << "Unable to open " << e.what() << endl;
     } catch ( const exception& e ) {
         cerr << "ERROR: " << e.what() << err << endl;
     } catch (...) {

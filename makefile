@@ -18,9 +18,8 @@ CFLAGS = -c -Wall -Iinclude
 # make target specifies a specific target
 # $^ is an example of a special variable.  It substitutes all dependencies
 countwords : dicttree.o inserting.o searching.o threadargs.h arguments.o countwords.o
-	$(CXX) $(CXXFLAGS) $(CXXTHREADS) $^ 
+	$(CXX) $(CXXFLAGS) $(CXXTHREADS) -o dicttest $^ 
 	
-# -o countwords
 
 dicttree.o : dicttree.h dicttree.cpp
 

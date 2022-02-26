@@ -9,6 +9,8 @@
         "stdexcept": "cpp",
         "filesystem": "cpp",
         "iterator": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "ostream": "cpp",
+        "*.tcc": "cpp"
     }
 }
