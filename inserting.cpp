@@ -23,6 +23,12 @@ using namespace std;
 /* SET REFERENCE TO STRUCT DECLARED IN countwords.cpp */
 extern struct Thread_Args EXEC_STATUS;
 
+/**
+ * @brief  PREPROCCESS ALL BYTES IN THE INPUT FILE
+ * 
+ * @param filename: CHAR ARRAY OF RELATIVE PATH
+ * @return int:     FILE SIZE IN BYTES
+ */
 static int read_all_bytes(char const* filename){
     ifstream ifs(filename, ios::binary|ios::ate);
     ifstream::pos_type pos = ifs.tellg();
@@ -40,7 +46,6 @@ void *inserting::insert(void* arg){
         " \n\r !\"#$%&()*+,-./0123456789:;<=>?@[\\]^_`{|}~";
     
     try{
-
         /* CAST THREAD ARGUMENT TO SHARED DATA STRUCTURE */
         struct Thread_Args *tmp = (struct Thread_Args*)arg;
         
@@ -57,9 +62,6 @@ void *inserting::insert(void* arg){
         /* SET VALUES OR I/O OBJECTS */
         file.open(PATH);
 
-        /* PREPROCESS TOTAL BYTES OF INCOMING FILE */
-        EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] = 
-            (long)read_all_bytes(PATH);
         
         
         /* ITERATE THROUGH EACH LINE OF FILE */
@@ -67,10 +69,14 @@ void *inserting::insert(void* arg){
             
             /* FILE IS VALID */
             EXEC_STATUS.good_file[DICTOINARY_INDEX] = true;
-            while (getline(file,line)){
 
-                /* UPDATE TOTAL BYTES PROCESSED
-                   CHARACTERS IN STRING + 1 FOR NEWLINE CHARACTER */
+            /* PREPROCESS TOTAL BYTES OF INCOMING FILE */
+            EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] = 
+                (long)read_all_bytes(PATH);
+                        
+            while (getline(file,line)){
+                
+                /* UPDATE TOTAL BYTES PROCESSED CHARACTERS IN STRING + 1 FOR NEWLINE CHARACTER */
                 long length = line.length()+1;
                 EXEC_STATUS.chars_processed[DICTOINARY_INDEX]+=length;
                 
@@ -89,7 +95,7 @@ void *inserting::insert(void* arg){
         } else {
             file.close();
             EXEC_STATUS.task_done[DICTOINARY_INDEX]=true;
-            pthread_exit(0);
+            pthread_exit(NULL);
         }
     } catch (const ifstream::failure& e){
         file.close();

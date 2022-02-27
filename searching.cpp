@@ -70,16 +70,17 @@ void* searching::search(void* arg){
         /* SET VALUES OR I/O OBJECTS */
         in_file.open(PATH);
         out_file.open("countwords_output.txt");
-        
-        /* PREPROCESS TOTAL BYTES OF INCOMING FILE */
-        EXEC_STATUS.chars_in_file[SAMPLE_INDEX] = 
-            (long)read_all_bytes(PATH);
 
         /* ITERATE THROUGH EACH LINE OF FILE */
         if(in_file.is_open()){
 
             /* FILE IS VALID */
             EXEC_STATUS.good_file[SAMPLE_INDEX] = true;
+
+            /* PREPROCESS TOTAL BYTES OF INCOMING FILE */
+            EXEC_STATUS.chars_in_file[SAMPLE_INDEX] = 
+                (long)read_all_bytes(PATH);
+            
             while (getline(in_file,line)){
 
                 /* CHARACTERS IN STRING + 1 FOR NEWLINE CHARACTER */
@@ -108,13 +109,12 @@ void* searching::search(void* arg){
             in_file.close();
             out_file.close();
             EXEC_STATUS.task_done[SAMPLE_INDEX]=true;
-            pthread_exit(0);
+            pthread_exit(NULL);
         }
         out_file.close();
     } catch (const ifstream::failure& e){
         in_file.close();
         out_file.close();
-        cout <<"HEREHERHEHRE" << endl;
         throw("Exception opening/reading file");
         
     }

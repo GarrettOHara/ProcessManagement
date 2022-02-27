@@ -61,20 +61,21 @@ int main(int argc, char* argv[]){
         pthread_create(&insert, NULL, inserting::insert, &EXEC_STATUS);
         pthread_create(&search, NULL, searching::search, &EXEC_STATUS);
         
-        /* WAIT UNTIL FILE SIZE IS INITIALIZED */
-        while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]==0){}
+        /* WAIT UNTIL FILE SIZE IS INITIALIZED OR THREAD WORK DONE */
+        while(EXEC_STATUS.chars_in_file[DICTOINARY_INDEX]==0 
+            && !EXEC_STATUS.task_done[DICTOINARY_INDEX]){ }
         
         /* PROGRESS BAR UTILITY VARIABLE */
         long hash_index = 1;
 
         /* WAIT FOR INSERTING THREAD TO FINISH EXECUTION */
         while(!EXEC_STATUS.task_done[DICTOINARY_INDEX]){
-            
+
             /* CHECK TO SEE IF FILE WAS OPENED */
             if(EXEC_STATUS.good_file[DICTOINARY_INDEX]){
 
-                /* SET DIVISOR AS DIVIDENT OF TOTAL CHARS AND DESIRED PROGRESS MARKS 
-                FOR EVEN INCREMENTATIONS */
+                /* SET DIVISOR AS DIVIDENT OF TOTAL CHARS AND DESIRED PROGRESS MARKS */
+                /* FOR EVEN INCREMENTATIONS */
                 const long divider = EXEC_STATUS.chars_in_file[DICTOINARY_INDEX] 
                     / (long)EXEC_STATUS.progress_marks;
 
@@ -86,11 +87,8 @@ int main(int argc, char* argv[]){
                         cout << '#' << flush;
                     hash_index++;
                 }
-            } else {
-                throw ios_base::failure(EXEC_STATUS.file_path[DICTOINARY_INDEX]);
             }
         }
-        
         /* DISPLAY FILE DATA */
         if(EXEC_STATUS.good_file[DICTOINARY_INDEX]){
             cout << "\nThere are "
@@ -99,10 +97,14 @@ int main(int argc, char* argv[]){
             << EXEC_STATUS.file_path[DICTOINARY_INDEX]
             << "."
             << endl;
+        } else {
+            pthread_cancel(insert);
+            throw ios_base::failure(EXEC_STATUS.file_path[DICTOINARY_INDEX]);
         }
 
-        /* WAIT FOR INSERTING THREAD TO FINISH EXECUTION */
-        while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]==0){}
+        /*  WAIT UNTIL FILE SIZE IS INITIALIZED OR THREAD WORK DONE */
+        while(EXEC_STATUS.chars_in_file[SAMPLE_INDEX]==0 
+            && !EXEC_STATUS.task_done[SAMPLE_INDEX]){}
 
         /* RESET PROGRESS BAR UTILITY VARIABLE */
         hash_index = 1;
@@ -124,8 +126,6 @@ int main(int argc, char* argv[]){
                         cout << '#' << flush;
                     hash_index++;
                 }
-            }else {
-                throw ios_base::failure(EXEC_STATUS.file_path[SAMPLE_INDEX]);
             }
         }
 
@@ -140,12 +140,12 @@ int main(int argc, char* argv[]){
         }
 
         /* SUCCESS */
-        return 1;
+        return 0;
         
     } catch(const char* msg){
         cout << msg << err << endl;
     } catch (const ios_base::failure& e){
-        cout << "Unable to open " << e.what() << endl;
+        cout << "Unable to open <<" << e.what() << ">>" << endl;
     } catch ( const exception& e ) {
         cerr << "ERROR: " << e.what() << err << endl;
     } catch (...) {
